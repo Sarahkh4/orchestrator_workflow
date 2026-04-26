@@ -1,6 +1,4 @@
-def main():
-    print("Hello from orchestration!")
+from src.workflow import workflow_builder
 
 
-if __name__ == "__main__":
-    main()
+print(workflow_builder.invoke("Generate an report on "))

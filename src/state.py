@@ -1,5 +1,7 @@
 from typing_extensions import TypedDict
 from typing import Annotated, List
+from .schema import Section, Sections
+import operator
 
 
 class State(TypedDict):

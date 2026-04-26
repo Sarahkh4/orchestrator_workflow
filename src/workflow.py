@@ -1,11 +1,13 @@
 from .nodes import(
-    orchestrater,
+    orchestrator,
     llm_call,
     synthesizer,
     assign_workers
 )
 
-from langgraph.graph import START,END, STATEGRAPH
+from langgraph.graph import START,END, StateGraph
+from .state import State, WorkerState
+
 
 def workflow_builder():
     builder = StateGraph(State)
@@ -16,7 +18,7 @@ def workflow_builder():
     builder.add_node("assign_workers",assign_workers)
 
     builder.add_edge(START, "orchestrator")
-    builder.add_conditional_edge(
+    builder.add_conditional_edges(
         "orchestrator",
         assign_workers , ["llm_call"]
         )

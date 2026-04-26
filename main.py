@@ -1,4 +1,6 @@
 from src.workflow import workflow_builder
 
 
-print(workflow_builder.invoke("Generate an report on "))
+orchestrator_worker = workflow_builder()
+report = orchestrator_worker.invoke({"topic": "Create a report on LLM scaling laws"})
+print(report)

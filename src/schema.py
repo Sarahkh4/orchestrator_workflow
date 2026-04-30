@@ -34,8 +34,6 @@ class Sections(BaseModel):
 planner = llm.with_structured_output(Sections)
 
 # for testing purpose only
-
 # result = planner.invoke("Generate a report outline(2 sections) with a section about 'Neural Network' that includes the main features of a CNN architecture")
-
 # print(result.sections)
 

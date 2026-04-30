@@ -6,7 +6,7 @@ from .nodes import(
 )
 
 from langgraph.graph import START,END, StateGraph
-from .state import State, WorkerState
+from .state import State
 
 
 def workflow_builder():

@@ -9,7 +9,7 @@ async def llm_call(state: WorkerState):
         section = await llm.ainvoke(
             [
                 SystemMessage(content = "Write a report section following the provided name and description. Include no preamble for each section. Use markdown formatting"),
-                HumanMessage(content = f"Here is the section name {state["section"].name} and description {state["section"].description}")
+                HumanMessage(content = f"Here is the section name {state['section'].name} and description {state['section'].description}")
             ]
         )
         return {"completed_sections": [section.content]}

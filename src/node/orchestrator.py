@@ -9,7 +9,7 @@ async def orchestrator(state: State):
         report_sections = await planner.ainvoke(
             [
                 SystemMessage(content = "Generate a plan for the report"),
-                HumanMessage(content = f"Here is the report topic: {state["topic"]}"),
+                HumanMessage(content = f"Here is the report topic: {state['topic']}"),
             ]
         )
         return {"sections": report_sections.sections}

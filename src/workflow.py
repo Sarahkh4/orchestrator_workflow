@@ -1,7 +1,7 @@
-from node.orchestrator import orchestrator
-from node.llm_call import llm_call
-from node.assign_workers import assign_workers
-from node.synthesizer import synthesizer
+from src.node.orchestrator import orchestrator
+from src.node.llm_call import llm_call
+from src.node.assign_workers import assign_workers
+from src.node.synthesizer import synthesizer
 
 from langgraph.graph import START,END, StateGraph
 from schema.state import State

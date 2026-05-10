@@ -18,4 +18,4 @@ def tavily_tool(query:str):
         passed to a LangChain agent as part of its tools list.
 
     """
-    return tavily_client 
+    return tavily_client.invoke(query) 

@@ -12,6 +12,6 @@ def synthesizer(state: State):
         completed_report_sections = "\n\n---\n\n".join(completed_sections)
 
         return {"final_report": completed_report_sections}
-    
+        
     except Exception as e:
         raise RuntimeError(f"Failed to synthesize report: {e}")

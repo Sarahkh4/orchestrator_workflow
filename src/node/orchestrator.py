@@ -4,7 +4,8 @@ from utils.llm_planner import planner
 
 async def orchestrator(state: State):
     """Orchestrator that generates a plan for the report"""
-
+    
+        
     try:
         report_sections = await planner.ainvoke(
             [

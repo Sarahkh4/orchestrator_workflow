@@ -1,0 +1,7 @@
+# Word limits for report sections
+MIN_SECTION_WORDS = 200
+MAX_SECTION_WORDS = 300
+
+# Search settings
+TAVILY_MAX_RESULTS = 2
+TAVILY_CONTENT_TRUNCATE = 300

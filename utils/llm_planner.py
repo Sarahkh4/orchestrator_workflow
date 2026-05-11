@@ -12,7 +12,7 @@ llm = init_chat_model(
     model = "gpt-4o-mini",
     model_provider = "openai",
     api_key = api_key,
-    base_url = base_url
+    base_url = base_url,
 )
 
 # Augment the LLM with schema for structured output

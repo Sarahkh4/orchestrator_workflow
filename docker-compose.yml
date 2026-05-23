@@ -8,9 +8,27 @@ services:
       - .env
     depends_on:
       - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - pdfs_data:/app/pdfs
+
+  worker:
+    build: .
+    command: celery -A services.celery_app.celery_app worker --loglevel=info --concurrency=2
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - pdfs_data:/app/pdfs
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
-      
+
+volumes:
+  pdfs_data:

@@ -12,7 +12,7 @@ async def generate(req: TopicRequest):
     return {
         "job_id": job_id,
         "status": "queued",
-        "message": f"Report queued. Connect to /status/{job_id} to receive updates."
+        "message": f"Report queued. Connect to /status/{job_id} for SSE updates or /jobs/{job_id} for latest status."
     }
 
 
@@ -23,5 +23,5 @@ async def download(req: TopicRequest):
     return {
         "job_id": job_id,
         "status": "queued",
-        "message": f"PDF queued. Connect to /pdf-status/{job_id} to receive updates."
+        "message": f"PDF queued. Connect to /pdf-status/{job_id} for SSE updates or /jobs/{job_id} for latest status."
     }

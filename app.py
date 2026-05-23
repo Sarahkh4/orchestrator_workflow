@@ -1,23 +1,9 @@
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
 from src.routes.generate import router as generate_router
 from src.routes.sse import router as sse_router
-from services.worker_service import process_jobs
-import asyncio
-import logging
-
-logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    asyncio.create_task(process_jobs())
-    logger.info("Background worker started")
-    yield
-    logger.info("App shutting down")
-
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI()
 
 app.include_router(generate_router)
 app.include_router(sse_router)

@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.14.3",
+    "celery[redis]>=5.4.0",
     "dotenv>=0.9.9",
     "fastapi>=0.136.1",
     "groq<1",
@@ -16,7 +17,7 @@ dependencies = [
     "langgraph>=1.1.9",
     "markdown>=3.10.2",
     "python-multipart>=0.0.26",
-    "redis>=7.4.0",
+    "redis>=5.0.3,<6.5",
     "reportlab>=4.4.10",
     "sse-starlette>=3.4.4",
     "tavily-python>=0.7.24",

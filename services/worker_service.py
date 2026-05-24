@@ -1,63 +1,81 @@
-import json
 import asyncio
+import json
 import logging
-from services.queue_service import redis_client, QUEUE_NAME, publish_event
-from workflow import workflow_builder
+
+import redis
+
+from services.celery_app import REDIS_URL, celery_app
+from src.pdf_generator import generate_pdf
+from src.workflow import workflow_builder
+
 
 logger = logging.getLogger(__name__)
-
 orchestrator_worker = workflow_builder()
+sync_redis_client = redis.Redis.from_url(REDIS_URL, decode_responses=True)
+JOB_STATUS_PREFIX = "job_status:"
 
 
-async def process_jobs():
-    """
-    Continuously listens to the Redis queue and processes jobs one by one.
-    This runs in the background when the app starts.
-    """
-    logger.info("Worker started, listening for jobs...")
+def _set_job_status(job_id: str, data: dict):
+    sync_redis_client.set(f"{JOB_STATUS_PREFIX}{job_id}", json.dumps(data), ex=24 * 60 * 60)
 
-    while True:
-        try:
-            # brpop blocks and waits until a job appears in the queue
-            # It's like standing at a conveyor belt, waiting for the next item
 
-            # brpop  → pop item OUT of the list (b = blocking, waits until something appears)
+def _publish_event(job_id: str, data: dict):
+    _set_job_status(job_id, data)
+    sync_redis_client.publish(job_id, json.dumps(data))
 
-            job_data = await redis_client.brpop(QUEUE_NAME, timeout=1)
 
-            if not job_data:
-                continue  # No job yet, keep waiting
+async def _run_generation(topic: str, job_type: str) -> dict:
+    result = await orchestrator_worker.ainvoke({"topic": topic})
+    report = result.get("final_report", "")
 
-            _, raw = job_data
-            job = json.loads(raw)
-            job_id = job["job_id"]
-            topic = job["topic"]
+    if job_type == "report":
+        return {"status": "completed", "report": report}
 
-            logger.info(f"Processing job {job_id} for topic: {topic}")
+    if job_type == "pdf":
+        pdf_path = await generate_pdf(report)
+        return {
+            "status": "completed",
+            "pdf_path": pdf_path,
+            "download_url": f"/download-pdf/{pdf_path}",
+            "message": "PDF ready",
+        }
 
-            # Tell the user their job started
-            await publish_event(job_id, {
-                "status": "processing",
-                "message": "Report generation started"
-            })
+    raise ValueError(f"Unsupported job type: {job_type}")
 
-            # Run the actual workflow
-            result = await orchestrator_worker.ainvoke({"topic": topic})
-            report = result.get("final_report", "")
 
-            # Tell the user it's done and send the report
-            await publish_event(job_id, {
-                "status": "completed",
-                "report": report
-            })
+@celery_app.task(bind=True, name="services.worker_service.generate_report_task")
+def generate_report_task(self, topic: str, job_type: str = "report"):
+    """Celery task for heavyweight report/PDF generation."""
+    job_id = self.request.id
 
-            logger.info(f"Job {job_id} completed")
+    try:
+        logger.info("Processing %s job %s for topic: %s", job_type, job_id, topic)
+        _publish_event(job_id, {
+            "job_id": job_id,
+            "topic": topic,
+            "job_type": job_type,
+            "status": "processing",
+            "message": f"{job_type.upper()} generation started",
+        })
 
-        except Exception as e:
-            logger.error(f"Worker error: {e}")
-            await publish_event(job_id, {
-                "status": "failed",
-                "message": f"Report generation failed: {str(e)}"
-            })
+        payload = asyncio.run(_run_generation(topic, job_type))
+        payload.update({
+            "job_id": job_id,
+            "topic": topic,
+            "job_type": job_type,
+        })
+        _publish_event(job_id, payload)
+        logger.info("Job %s completed", job_id)
+        return payload
 
-            await asyncio.sleep(1)  # Brief pause before retrying after error
+    except Exception as exc:
+        logger.exception("Job %s failed", job_id)
+        payload = {
+            "job_id": job_id,
+            "topic": topic,
+            "job_type": job_type,
+            "status": "failed",
+            "message": f"Job failed: {exc}",
+        }
+        _publish_event(job_id, payload)
+        raise

@@ -1,5 +1,6 @@
 import markdown
 import uuid
+from pathlib import Path
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet
 from bs4 import BeautifulSoup
@@ -17,9 +18,11 @@ async def generate_pdf(report: str) -> str:
         html = markdown.markdown(report)
         soup = BeautifulSoup(html, "html.parser")
 
-        file_path = f"pdfs/report_{uuid.uuid4().hex}.pdf"
+        output_dir = Path("pdfs")    
+        output_dir.mkdir(parents=True, exist_ok=True)
+        file_path = output_dir / f"report_{uuid.uuid4().hex}.pdf"
         styles = getSampleStyleSheet()
-        doc = SimpleDocTemplate(file_path)
+        doc = SimpleDocTemplate(str(file_path))
         story = []
 
         for element in soup.contents:
@@ -42,7 +45,7 @@ async def generate_pdf(report: str) -> str:
 
         await asyncio.to_thread(doc.build, story)
         logger.info(f"PDF generation completed successfully. File saved as {file_path}")
-        return file_path
+        return str(file_path)
     
     except Exception as e:
         logger.error(f"Failed to generate PDF: {e}")

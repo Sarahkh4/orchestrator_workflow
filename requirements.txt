@@ -9,3 +9,7 @@ markdown
 reportlab
 beautifulsoup4
 aiofiles
+celery[redis]
+redis
+sse-starlette
+langchain-tavily

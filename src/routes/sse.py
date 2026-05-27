@@ -59,6 +59,12 @@ async def pdf_status(job_id: str):
     return EventSourceResponse(stream_events(job_id))
 
 
+@router.get("/docx-status/{job_id}")
+async def docx_status(job_id: str):
+    """SSE endpoint for DOCX jobs"""
+    return EventSourceResponse(stream_events(job_id))
+
+
 @router.get("/download-pdf/{file_name:path}")
 async def download_pdf(file_name: str):
     """Serve the generated PDF file once ready"""
@@ -70,3 +76,20 @@ async def download_pdf(file_name: str):
         raise HTTPException(status_code=404, detail="PDF file not found")
 
     return FileResponse(file_path, filename="report.pdf", media_type="application/pdf")
+
+
+@router.get("/download-docx/{file_name:path}")
+async def download_docx(file_name: str):
+    """Serve the generated DOCX file once ready"""
+    clean_name = file_name.replace("\\", "/").lstrip("/")
+    clean_name = clean_name.removeprefix("download-docx/").removeprefix("docx/")
+    file_path = Path("docx") / clean_name
+
+    if not file_path.is_file():
+        raise HTTPException(status_code=404, detail="DOCX file not found")
+
+    return FileResponse(
+        file_path,
+        filename="report.docx",
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    )

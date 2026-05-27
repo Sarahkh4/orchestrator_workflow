@@ -12,6 +12,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
     volumes:
       - pdfs_data:/app/pdfs
+      - docx_data:/app/docx
+      - reports_data:/app/reports
 
   worker:
     build: .
@@ -24,6 +26,8 @@ services:
       - REDIS_URL=redis://redis:6379/0
     volumes:
       - pdfs_data:/app/pdfs
+      - docx_data:/app/docx
+      - reports_data:/app/reports
 
   redis:
     image: redis:alpine
@@ -32,3 +36,5 @@ services:
 
 volumes:
   pdfs_data:
+  docx_data:
+  reports_data:

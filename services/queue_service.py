@@ -11,14 +11,20 @@ JOB_STATUS_PREFIX = "job_status:"
 redis_client = redis.from_url(REDIS_URL, decode_responses=True)
 
 
-async def enqueue_job(topic: str, job_type: str = "report") -> str:
+async def enqueue_job(
+    topic: str,
+    job_type: str = "report",
+    report: str | None = None,
+    report_job_id: str | None = None,
+    report_path: str | None = None,
+) -> str:
     """
     Enqueue a report/PDF generation task with Celery.
     Redis is used by Celery as the broker and by the API for live job status.
     """
     task = celery_app.send_task(
         "services.worker_service.generate_report_task",
-        args=[topic, job_type],
+        args=[topic, job_type, report, report_job_id, report_path],
     )
     await set_job_status(task.id, {
         "job_id": task.id,

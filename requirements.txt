@@ -13,3 +13,4 @@ celery[redis]
 redis
 sse-starlette
 langchain-tavily
+python-docx
